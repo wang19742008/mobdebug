@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mobile debug</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+  <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  <style type="text/css">
+
+  </style>
+
+  <script>
+    //$.ajax().jsonp = '_cb';
+    flush(0);
+    console.log(parent);
+    console.log(parent.frames("topFrame"));
+    console.log(parent.frames("topFrame").document.all.txtFilter.value);
+
+    function flush(start){
+      $.ajax({
+       type: "GET",
+       dataType: "jsonp",
+       url: "http://127.0.0.1:1337/fp",
+       data: {'start': start},
+       jsonp: "_cb",
+       success : function(json){
+          var j = JSON.parse(json);
+          $.each(j,function(i,o){
+            append(o);
+            start = o.id;
+          });
+          //document.body.scrollTop = document.body.scrollHeight;
+          setTimeout(function(){
+            flush(start);
+          }, 500);
+        },
+        error:function(){
+          console.log('fail');
+        }
+      });
+
+    }
+    function append(d){
+      var t = new Date(parseInt(d.time)*1000);
+      var s = '<tr>';
+      s += '<td>' + t.getHours()+":"+t.getMinutes()+":"+t.getSeconds() + '</td>';
+      s += '<td style="word-break:break-all">' + d.url + '</td>';
+      s += '<td>' + '200' + '</td>';
+      s += '<td></td>';
+      s += '<td></td>';
+      s += '</tr>';
+      $('#plist').append(s);
+    }
+
+  </script>
+</head>
+<body>
+  <div  class="container">
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>时间</th>
+            <th>url</th>
+            <th>code</th>
+            <th>ContentType</th>
+            <th>op</th>
+          </tr>
+        </thead>
+        <tbody id="plist">
+
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
